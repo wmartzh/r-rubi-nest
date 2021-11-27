@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserTypes {
+  SUPER_ADMIN
+  ADMIN
+  STAFF
+  CLIENT
+  UNDEFINED
+}
+
+enum OrderStatus {
+  IN_PROCCESS
+  DELAYED
+  COMPLETED
+  CLOSED
+}
+
+enum OrderType {
+  ON_LOCAL
+  TO_GO
+}
+
+model User {
+  id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  name      String
+  email     String    @unique
+  userType  UserTypes @default(UNDEFINED)
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+
+  Orders Order[]
+}
+
+model Category {
+  id          String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  productId   String[]
+  products    Product[] @relation(fields: [productId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+
+}
+
+model Product {
+  id String @id @default(dbgenerated()) @map("_id") @db.ObjectId
+
+  productImage String?
+  name         String
+  description  String?
+  cost         Decimal?
+  price        Decimal
+  stock        Decimal
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+
+  categories  Category[]
+  orders      Order[]    @relation(fields: [ordersIds])
+  ordersIds   String[]   @db.Array(ObjectId)
+  categoryIds String[]   @db.Array(ObjectId)
+}
+
+model Order {
+  id        String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  createdBy String
+  type      OrderType   @default(TO_GO)
+  status    OrderStatus @default(IN_PROCCESS)
+  notes     String?
+  subtotal  Decimal     @default(0.00)
+  discount  Decimal     @default(0.00)
+  total     Decimal     @default(0.00)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now())
+
+  client      User      @relation(fields: [clientId], references: [id])
+  products    Product[] @relation(fields: [productsIds])
+  clientId    String
+  productsIds String[]  @db.Array(ObjectId)
+}
