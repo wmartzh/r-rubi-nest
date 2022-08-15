@@ -4,14 +4,17 @@ import {
   Get,
   InternalServerErrorException,
   Post,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { CreateProductDto } from 'src/dtos/product.dto';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { ProductsService } from './products.service';
-
+@UseGuards(JwtAuthGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private productService: ProductsService) {}
+
   @Get()
   public async list() {
     try {
