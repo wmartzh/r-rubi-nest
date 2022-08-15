@@ -23,6 +23,10 @@ export class UserService {
     return bcrypt.hashSync(password, salt);
   }
 
+  public validatePassword(current: string, compare: string) {
+    return bcrypt.compareSync(compare, current);
+  }
+
   public async create(user: UserForm) {
     return this.userModel.create({
       data: user,

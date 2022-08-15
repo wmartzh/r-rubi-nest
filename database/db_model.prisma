@@ -2,8 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["mongoDb"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -32,7 +31,7 @@ enum OrderType {
 }
 
 model User {
-  id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   email     String    @unique
   userType  UserTypes @default(UNDEFINED)
@@ -44,48 +43,45 @@ model User {
 }
 
 model Category {
-  id          String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
-  productId   String[]
-  products    Product[] @relation(fields: [productId], references: [id])
+  productIds  String[]  @db.ObjectId
+  products    Product[] @relation(fields: [productIds], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
-
 }
 
 model Product {
-  id String @id @default(dbgenerated()) @map("_id") @db.ObjectId
-
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
   productImage String?
   name         String
   description  String?
-  cost         Decimal?
-  price        Decimal
-  stock        Decimal
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
-
-  categories  Category[]
-  orders      Order[]    @relation(fields: [ordersIds])
-  ordersIds   String[]   @db.Array(ObjectId)
-  categoryIds String[]   @db.Array(ObjectId)
+  cost         Float?
+  price        Float
+  stock        Float
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now())
+  categoryIds  String[]   @db.ObjectId
+  categories   Category[] @relation(fields: [categoryIds], references: [id])
+  ordersIds    String[]   @db.ObjectId
+  orders       Order[]    @relation(fields: [ordersIds], references: [id])
 }
 
 model Order {
-  id        String      @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
   createdBy String
   type      OrderType   @default(TO_GO)
   status    OrderStatus @default(IN_PROCCESS)
   notes     String?
-  subtotal  Decimal     @default(0.00)
-  discount  Decimal     @default(0.00)
-  total     Decimal     @default(0.00)
+  subtotal  Float       @default(0.00)
+  discount  Float       @default(0.00)
+  total     Float       @default(0.00)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now())
 
-  client      User      @relation(fields: [clientId], references: [id])
-  products    Product[] @relation(fields: [productsIds])
+  productsIds String[]  @db.ObjectId
+  products    Product[] @relation(fields: [productsIds], references: [id])
   clientId    String
-  productsIds String[]  @db.Array(ObjectId)
+  client      User      @relation(fields: [clientId], references: [id])
 }
